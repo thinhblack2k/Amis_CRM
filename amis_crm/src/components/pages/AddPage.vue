@@ -551,7 +551,7 @@ import LIST_VOCATIVE from "../../constants/ListVocative";
 import BaseButton from "../base/BaseButton.vue";
 import BaseCheckbox from "../base/BaseCheckbox.vue";
 import BaseDatePicker from "../base/BaseDatePicker.vue";
-import BaseDropDown from "../base/BaseDropDown.vue";
+import BaseDropDown from "../base/BaseDropDownMenu.vue";
 import BaseTextArea from "../base/BaseTextArea.vue";
 import BaseTextField from "../base/BaseTextField.vue";
 import BasePopup from "../base/BasePopup.vue";

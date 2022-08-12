@@ -1,200 +1,251 @@
 <template>
-  <div :id="id" class="crm-dropdown">
-    <button
-      type="button"
-      @click="isOpen = !isOpen"
-      :class="{ isActive: isOpen }"
-    >
-      <div class="dropdown-content" :v-model="text">{{ text }}</div>
-      <div class="icon icon-dropdown"></div>
-    </button>
-    <div class="dropdown-list" v-show="isOpen">
-      <div class="item__search" v-if="isInputSearch">
-        <input class="search__input" placeholder="Tìm kiếm" id="input-search"/>
-        <div class="search__icon"><div class="icon-search"></div></div>
+  <div class="dropdown">
+    <div class="dropdown__select"  @click="showDataOnclick()">
+      <span class="">{{ text }}</span>
+      <div class="dropdown-button-down center-item">
+        <div v-if="this.showData == false" class="icon--down"></div>
+        <div v-if="this.showData == true" class="icon--up"></div>
       </div>
-      <DropDownItem
-        v-for="(item, index) in arrays"
-        :key="index"
-        :item="item"
-        :closeDropdown="callToClose"
-        @click="() => itemOnSelect(item)"
-      >
-        {{ item.text }}
-      </DropDownItem>
+    </div>
+    <div class="drop__container" v-show="showData">
+      <div class="dropdown__search">
+        <input type="text" placeholder="Tìm kiếm" v-model="text" @input="inputOnChange()" />
+        <div class="button-search center-item">
+          <div class="icon--search"></div>
+        </div>
+      </div>
+      <div class="dropdown__data">
+        <div class="dropdown__item">-Không chọn-</div>
+        <div
+          class="dropdown__item"
+          @click="itemOnselect(item)"
+          v-for="item in dataFilter"
+          :key="item.id"
+        >
+          {{ item.name }}
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
-import DropDownItem from "./BaseDropDownItem.vue";
-import uuid from "../../ultis/random-id";
 export default {
   name: "BaseDropDown",
   components: {
-    DropDownItem,
-  },
-  setup() {
-    return {
-      id: uuid(),
-    };
+
   },
   data() {
     return {
-      isOpen: false,
-      data: [],
-      text: "-Không chọn-",
-      value: null,
+      showData: false,
+      data: [
+        { id: 1, name: "dong" },
+        { id: 2, name: "anh" },
+      ],
+      dataFilter: [
+        { id: 1, name: "dong" },
+        { id: 2, name: "anh" },
+      ],
+      text: null,
     };
   },
   props: {
-    url: {
-      type: String,
-
-    },
-    propValue: String,
+    url: String,
     propText: String,
-
-    //Truyền vào màu của chữ
-    color: {
-      type: String,
-    },
-
-    //Truyền vào mảng
-    arrays: {
-      type: Array,
-      default: () => [],
-    },
-
-    //Truyền vào nội dụng hiển thị ban đầu của dropdown
-    dropdownContent: {
-      type: String,
-      required: true,
-    },
-    //Có tìm kiếm
-    hasInputSearch: {
+    PropValue: String,
+    isLoadingData: {
       type: Boolean,
-      default: false,
+      default: true,
     },
   },
-  computed: {
-    isInputSearch() {
-      return this.hasInputSearch;
-    },
-  },
-  methods: {
-    // Hàm thực hiện việc đóng DropDown
-    callToClose() {
-      this.isOpen = false;
-    },
-    // Nếu click ra ngoài, drop down menu tắt
-    onClick(event) {
-      if (!document.getElementById(this.id).contains(event.target)) {
-        this.isOpen = false;
-      }
-      document.getElementById("input-search").focus();
-    },
-    itemOnSelect(item) {
-      this.text = item.text;
-    },
-  },
+
   created() {
-    window.addEventListener("click", this.onClick);
-    //Thực hiện lấy dữ liệu từ API
-    // fetch(this.url)
-    //   .then(res => res.json())
-    //   .then(res => {
-    //     this.data = res;
-    //   })
+    /**
+    thực hiện lấy dữ liệu từ API ?
+    author: dvdong 31/07/2022
+     */
+    if (this.isLoadingData) {
+      fetch(this.url)
+        .then((res) => res.json())
+        .then((res) => {
+          this.data = res;
+        })
+        .catch((res) => {
+          console.log(res);
+        });
+    }
   },
-  beforeUnmount() {
-    window.removeEventListener("click", this.onClick);
+
+  methods: {
+    /**
+    thực hiện ẩn hiện các item 
+    author: dvdong 31/07/2022
+     */
+    showDataOnclick() {
+      this.showData = !this.showData;
+    },
+    /**
+    thực hiện chọn một item
+    author: dvdong 31/07/2022
+     */
+    itemOnselect(item) {
+      this.text = item.name;
+      this.showData = false;
+    },
+    /**
+     * thực hiện auto select cho dropdown
+     * author: dvdong 1/8/2022
+     */
+    inputOnChange() {
+      var me = this;
+      //console.log(me.text);
+      me.dataFilter = me.data.filter(e=>{return e.name.includes(me.text)});
+      me.showData = true;
+    }
   },
 };
 </script>
 
 <style scoped>
-button {
+.dropdown {
+  width: 100%;
+  min-width: 200px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
   position: relative;
-  padding: 0 8px 0 16px;
-  background-color: white;
-  border: 1px solid black;
-  cursor: pointer;
-  transition: 0.3s;
+}
+.dropdown__select {
+  width: 100%;
+  min-width: 200px;
   height: 32px;
-  width: 100%;
-  border: 1px solid #d3d7de;
+  border: 1px solid var(--border-input-color);
+  /* primary-color-blue */
+  /* border:  1px solid var(--primary-color); */
+  border-radius: 4px;
+  background-color: #fff;
   padding-left: 16px;
-  padding-right: 8px;
-  border-radius: 4px;
-  -moz-background-clip: padding;
-  -webkit-background-clip: padding-box;
-  background-clip: padding-box;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-button:focus {
-  outline: 0px;
-}
-
-.crm-dropdown {
-  position: relative;
-  width: fit-content;
+  color: #1f2229;
+  padding-right: 30px;
+  box-sizing: border-box;
   cursor: pointer;
-  background: #ffffff;
-  width: 100%;
-}
-.dropdown-list {
-  position: absolute;
-  padding-bottom: 8px;
-  -ms-box-shadow: 0 -1px 8px rgba(0, 0, 0, 0.32);
-  -o-box-shadow: 0 -1px 8px rgba(0, 0, 0, 0.32);
-  box-shadow: 0 -1px 8px #00000052;
-  background: #ffffff;
-  border-radius: 4px;
-  -moz-background-clip: padding;
-  -webkit-background-clip: padding-box;
-  background-clip: padding-box;
-  width: 100%;
-  bottom: 32px;
-  right: 0px;
-}
-.dropdown-content {
-  color: v-bind(color);
-}
-
-.item__search{
   position: relative;
-  padding: 4px 0;
-  height: 40px;
   display: flex;
   align-items: center;
-  border-bottom: solid 1px #d3d7de!important;
 }
 
-.search__input{
-  flex: 1;
+.drop__container {
+  /* display: none; */
+  box-sizing: border-box;
+  box-shadow: 0 2px 6px #00000052;
+  position: absolute;
+  top: 29px;
+  left: 0;
+  right: 0;
+  border-radius: 0 0 4px 4px;
+  border-top: 1px solid var(--border-input-color);
+  z-index: 10;
+  background-color: #fff;
+}
+
+.dropdown-button-down {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+}
+.dropdown__data {
+  width: 100%;
+  min-width: 200px;
+  box-sizing: border-box;
+}
+
+.dropdown__search {
+  position: relative;
+  height: 40px;
+  border: 1px solid var(--border-input-color);
+  border-left: none;
+  border-right: none;
+  border-top: none;
+}
+
+.dropdown__search input {
+  width: 100%;
+  height: 100%;
+  padding: 8px 36px 8px 16px;
+  box-sizing: border-box;
   border: none;
-  padding: 4px 4px 4px 16px;
-  height: 28px;
-
-}
-
-.search__input::placeholder {
-  font-family: Roboto;
-  font-size: 13px;
-}
-
-.search__input:focus {
   outline: none;
-  border: none;
 }
 
+.button-search {
+  width: 32px;
+  height: 32px;
+  position: absolute;
+  right: 0px;
+  top: 4px;
+  cursor: pointer;
+}
 
-.search__icon {
+.dropdown__item {
+  width: 100%;
+  height: 32px;
+  padding: 6px 32px 6px 16px;
+  border: 1px solid transparent;
+  box-sizing: border-box;
+  color: #1f2229;
+  position: relative;
+}
+
+.item-selected::after {
+  content: "";
+  display: inline-block;
   width: 16px;
-  margin-right: 8px;
-  flex-shrink: 0;
+  height: 16px;
+  background: transparent
+    url(https://crmplatform.misacdn.net/app/assets/Images/icon/icon_collection.svg)
+    no-repeat -336px -144px;
+
+  position: absolute;
+  right: 12px;
+  top: calc(50% - 10px);
+}
+
+.dropdown__item:hover {
+  background-color: #f0f2f4;
+}
+
+.dropdown__item:active {
+  color: var(--primary-color);
+}
+
+.dropdown__item:first-child:active {
+  color: black;
+}
+
+.dropdown__item:first-child {
+  margin-top: 8px;
+}
+
+.dropdown__item:last-child {
+  margin-bottom: 8px;
+}
+
+::placeholder {
+  /* Chrome, Firefox, Opera, Safari 10.1+ */
+  color: #99a1b2;
+  opacity: 1; /* Firefox */
+}
+
+:-ms-input-placeholder {
+  /* Internet Explorer 10-11 */
+  color: #99a1b2;
+}
+
+::-ms-input-placeholder {
+  /* Microsoft Edge */
+  color: #99a1b2;
 }
 </style>

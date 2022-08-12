@@ -124,7 +124,7 @@
 
 <script>
 import PAGESIZE from "../../constants/PageSize";
-import BaseDropDown from "../base/BaseDropDown.vue";
+import BaseDropDown from "../base/BaseDropDownMenu.vue";
 import BaseCheckbox from "../base/BaseCheckbox.vue";
 import axios from "axios";
 export default {
